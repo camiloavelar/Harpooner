@@ -4,6 +4,7 @@ import com.github.erotourtes.harpoon.listeners.FilesRenameListener
 import com.github.erotourtes.harpoon.settings.SettingsChangeListener
 import com.github.erotourtes.harpoon.settings.SettingsState
 import com.github.erotourtes.harpoon.utils.FocusListener
+import com.github.erotourtes.harpoon.utils.PinSyncManager
 import com.github.erotourtes.harpoon.utils.State
 import com.github.erotourtes.harpoon.utils.menu.QuickMenu
 import com.intellij.openapi.Disposable
@@ -26,6 +27,7 @@ class HarpoonService(project: Project) : Disposable {
     private var state = State()
     private val fileEditorManager = FileEditorManager.getInstance(project)
     private val log = Logger.getInstance(HarpoonService::class.java)
+    private val pinSyncManager = PinSyncManager(project)
 
     init {
         FilesRenameListener(::onRenameFile, this)
@@ -34,7 +36,9 @@ class HarpoonService(project: Project) : Disposable {
             log.info("Settings changed")
             menu.updateSettings(it)
             menu.updateFile(getPaths())
+            syncPinsIfEnabled()
         }
+        pinSyncManager.setMenuFilePath(menu.virtualFile.path)
         syncWithMenu()
     }
 
@@ -132,8 +136,19 @@ class HarpoonService(project: Project) : Disposable {
         val isDeleteEvent = newPath == null
         if (isDeleteEvent) {
             state.remove(oldPath)
+            syncPinsIfEnabled()
         } else if (state.update(oldPath, newPath)) {
             menu.updateFile(getPaths())
+            syncPinsIfEnabled()
+        }
+    }
+
+    private fun syncPinsIfEnabled() {
+        if (!SettingsState.getInstance().syncPins) return
+        try {
+            pinSyncManager.syncPins(getPaths())
+        } catch (e: Exception) {
+            log.error("Failed to sync pins", e)
         }
     }
 
@@ -162,6 +177,8 @@ class HarpoonService(project: Project) : Disposable {
         } catch (e: Exception) {
             log.error("Could not update menu file", e)
         }
+
+        syncPinsIfEnabled()
 
         return result
     }
