@@ -14,6 +14,7 @@ data class HarpoonSettings(
     var showNotifications: Boolean = true,
     var adjustGitIgnore: Boolean = true,
     var syncPins: Boolean = false,
+    var closeOnSave: Boolean = false,
 )
 
 @State(
@@ -36,6 +37,9 @@ class SettingsState : PersistentStateComponent<SettingsState>, Observable<Settin
 
     val syncPins: Boolean
         get() = settings.syncPins
+
+    val closeOnSave: Boolean
+        get() = settings.closeOnSave
 
     override fun getState(): SettingsState = this
     override fun loadState(state: SettingsState) = XmlSerializerUtil.copyBean(state, this)

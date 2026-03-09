@@ -8,6 +8,11 @@ import com.github.erotourtes.harpoon.utils.PinSyncManager
 import com.github.erotourtes.harpoon.utils.State
 import com.github.erotourtes.harpoon.utils.menu.QuickMenu
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.AnActionResult
+import com.intellij.openapi.actionSystem.ex.AnActionListener
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
@@ -38,6 +43,7 @@ class HarpoonService(project: Project) : Disposable {
             menu.updateFile(getPaths())
             syncPinsIfEnabled()
         }
+        listenToMenuSave()
         pinSyncManager.setMenuFilePath(menu.virtualFile.path)
         syncWithMenu()
     }
@@ -141,6 +147,20 @@ class HarpoonService(project: Project) : Disposable {
             menu.updateFile(getPaths())
             syncPinsIfEnabled()
         }
+    }
+
+    private fun listenToMenuSave() {
+        ApplicationManager.getApplication().messageBus.connect(this)
+            .subscribe(AnActionListener.TOPIC, object : AnActionListener {
+                override fun afterActionPerformed(action: AnAction, event: AnActionEvent, result: AnActionResult) {
+                    if (!SettingsState.getInstance().closeOnSave) return
+                    val actionId = event.actionManager.getId(action) ?: return
+                    if (actionId != "SaveAll" && actionId != "SaveDocument") return
+                    if (menu.isMenuFileOpenedWithCurEditor()) {
+                        closeMenu()
+                    }
+                }
+            })
     }
 
     private fun syncPinsIfEnabled() {

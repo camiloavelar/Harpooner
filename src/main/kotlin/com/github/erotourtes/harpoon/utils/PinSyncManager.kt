@@ -45,7 +45,7 @@ class PinSyncManager(private val project: Project) {
         feManager: FileEditorManagerEx
     ) {
         val harpoonFileSet = harpoonFiles.toSet()
-        val openFiles = window.files.toList()
+        val openFiles = window.fileList.toList()
 
         // Unpin files not in Harpooner's list
         for (file in openFiles) {
@@ -77,7 +77,7 @@ class PinSyncManager(private val project: Project) {
         desiredOrder: List<VirtualFile>,
         feManager: FileEditorManagerEx
     ) {
-        val currentPinned = window.files.filter { window.isFilePinned(it) }
+        val currentPinned = window.fileList.filter { window.isFilePinned(it) }
         if (isPinnedOrderCorrect(currentPinned, desiredOrder)) return
 
         val docManager = FileDocumentManager.getInstance()

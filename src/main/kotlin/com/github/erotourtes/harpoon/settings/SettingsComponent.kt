@@ -29,6 +29,7 @@ class SettingsComponent {
     private val showNotificationsUI = JBCheckBox("Show notifications")
     private val adjustGitIgnoreUI = JBCheckBox("Automatically adjust .gitignore to include the menu file")
     private val syncPinsUI = JBCheckBox("Sync pinned tabs with Harpooner list")
+    private val closeOnSaveUI = JBCheckBox("Close menu on save")
 
     val state = UIState()
 
@@ -56,6 +57,7 @@ class SettingsComponent {
             .addComponent(showNotificationsUI, 1)
             .addComponent(adjustGitIgnoreUI, 1)
             .addComponent(syncPinsUI, 1)
+            .addComponent(closeOnSaveUI, 1)
             .addComponentFillVertically(JPanel(), 0)
             .panel
     }
@@ -68,6 +70,7 @@ class SettingsComponent {
         private var showNotifications: Boolean by CheckBoxDelegate(showNotificationsUI)
         private var adjustGitIgnore: Boolean by CheckBoxDelegate(adjustGitIgnoreUI)
         private var syncPins: Boolean by CheckBoxDelegate(syncPinsUI)
+        private var closeOnSave: Boolean by CheckBoxDelegate(closeOnSaveUI)
 
         private var uiSettings: HarpoonSettings
             get() = HarpoonSettings(
@@ -76,6 +79,7 @@ class SettingsComponent {
                 showNotifications = showNotifications,
                 adjustGitIgnore = adjustGitIgnore,
                 syncPins = syncPins,
+                closeOnSave = closeOnSave,
             )
             set(value) {
                 numberOfSlashes = value.numberOfSlashes
@@ -83,6 +87,7 @@ class SettingsComponent {
                 showNotifications = value.showNotifications
                 adjustGitIgnore = value.adjustGitIgnore
                 syncPins = value.syncPins
+                closeOnSave = value.closeOnSave
             }
 
         fun reset(settings: SettingsState) {
